@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+"""
+Usage: ./combine_FPKMS.py <samples.csv> <ctab_dir>
+
+create single file (all.csv) that contains FPKMs from all 16 samples in samples.csv
+"""
+
+
+import sys
+import os
+import pandas as pd
+
+
+df = pd.read_csv(sys.argv[1])
+fpkm_dict = {}
+
+
+#to make dataframe
+for index, sample, sex, stage in df.itertuples():
+    filename = os.path.join(sys.argv[2],sample,"t_data.ctab",)
+    ctab_df = pd.read_table(filename,index_col="t_name").loc[:,"FPKM"]
+    fpkm_dict[str(sex)+str(stage)] = ctab_df
+
+fpkms_all = pd.DataFrame(fpkm_dict)
+#to print with commas between instead of tab delimited
+fpkms_all.to_csv(sys.stdout)
