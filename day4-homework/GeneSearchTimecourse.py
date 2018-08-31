@@ -3,7 +3,7 @@
 """
 Usage: ./timecourse.py <gene_name> <samples.csv> <ctab_dir> 
 
-create a timecourse of a given transcript (FBtr0331261 for females and males)
+create a timecourse of a given gene for females and males. average FPKM
 """
 
 import sys
