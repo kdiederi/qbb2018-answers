@@ -26,7 +26,6 @@ def timecourse(gender):
         ctab_df = pd.read_table(filename,index_col="t_name")
         roi = ctab_df.loc[:,"gene_name"] == sys.argv[1]
         
-        fpkm = ctab_df.loc[roi,"FPKM"]
         fpkms.append(ctab_df.loc[roi,"FPKM"].mean())
         stages.append(stage)
     return fpkms,stages
@@ -34,8 +33,6 @@ def timecourse(gender):
 
 fpkms_female,stages = timecourse("female")
 fpkms_male,stages = timecourse("male")
-
-
 
 fig, ax = plt.subplots()
 ax.plot(fpkms_female, label="female", c="red")
