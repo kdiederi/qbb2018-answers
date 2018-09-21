@@ -1,0 +1,5 @@
+#contigs= 1
+min contig length= 100000
+max contig length= 100000
+avg contig length= 100000.0
+N50= 100000
