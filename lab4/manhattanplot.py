@@ -10,11 +10,10 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 for fname in sys.argv[1:]:
     treatment = fname.strip("plink."".qassoc")
-    chromosome = []
-    position =[]
-    pvalue_log10 = []
+    data = {}
     with open(fname) as f:
         for line in f:
             fields = line.strip().split()
@@ -23,19 +22,42 @@ for fname in sys.argv[1:]:
             if "NA" in line:
                 continue
             chrom = fields[0]
-            pos = float(fields[2])
+            pos = int(fields[2])
             pval = float(fields[8])
-            pval_log10 = np.log10(pval)
-            chromosome.append(chrom)
-            position.append(pos)
-            pvalue_log10.append(-pval_log10)
+            pval_log10 = -np.log10(pval)
+            if chrom not in data:
+                data[chrom] = {'positions':[], 'logpvals':[]}
+            data[chrom]['positions'].append(pos)
+            data[chrom]['logpvals'].append(pval_log10)
 
-    plt.scatter(position,pvalue_log10)
-    #instructions said higlight p values below 10E-5. -log(10E-5)=4
-    plt.axhline(y=4, color='r', linestyle='--')
-    plt.text(1700000,5,'threshold=\np<10E-5',fontsize= 'xx-small',horizontalalignment='center',verticalalignment='top')
-    plt.xlabel("Position")
-    plt.ylabel("-log(p)")
-    plt.title(str(treatment) + " Manhattan Plot")
+    fig,ax = plt.subplots(figsize=(20,5))
+
+    colors = ['skyblue', 'sandybrown']
+    highlights = ['steelblue', 'coral']
+
+    offset = 0
+    tick_pos = []
+    tick_labels = []
+    
+    for i, chrom in enumerate(data.keys()):
+        x = np.array(data[chrom]['positions'])
+        y = np.array(data[chrom]['logpvals'])
+    
+        sig = (y > 5)
+    
+        ax.scatter(x[sig] + offset,y[sig], marker='.', c=highlights[i%2])
+        ax.scatter(x[~sig] + offset,y[~sig], marker='.', c=colors[i%2])
+    
+        tick_labels.append(chrom)
+        maxx = max(x)
+        tick_pos.append(offset + maxx/2)
+        offset += maxx
+    ax.set_xticks(tick_pos)
+    ax.set_xticklabels(tick_labels)
+    ax.axhline(5, c='k', ls=':', label="Significance Cutoff")
+    ax.legend()
+    ax.set_xlabel("Genomic Position")
+    ax.set_ylabel("-log10 P-value")
+    ax.set_title("Manhattan Plot\n"+str(treatment))
     plt.savefig(str(treatment) + ".png")
     plt.close()
